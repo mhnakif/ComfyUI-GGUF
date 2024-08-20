@@ -8,6 +8,45 @@ from tqdm import tqdm
 
 from safetensors.torch import load_file
 
+# Dictionary to map GGMLQuantizationType names to LlamaFileType names
+quant_to_llama = {
+    "F32": "ALL_F32",
+    "F16": "MOSTLY_F16",
+    "Q4_0": "MOSTLY_Q4_0",
+    "Q4_1": "MOSTLY_Q4_1",
+    "Q5_0": "MOSTLY_Q5_0",
+    "Q5_1": "MOSTLY_Q5_1",
+    "Q8_0": "MOSTLY_Q8_0",
+    "Q8_1": "MOSTLY_Q8_1",
+    "Q2_K": "MOSTLY_Q2_K_S",
+    "Q3_K": "MOSTLY_Q3_K_S",
+    "Q4_K": "MOSTLY_Q4_K_S",
+    "Q5_K": "MOSTLY_Q5_K_S",
+    "Q6_K": "MOSTLY_Q6_K_S",
+    "Q8_K": "MOSTLY_Q8_K_S",
+    "IQ2_XXS": "MOSTLY_IQ2_XXS",
+    "IQ2_XS": "MOSTLY_IQ2_XS",
+    "IQ3_XXS": "MOSTLY_IQ3_XXS",
+    "IQ1_S": "MOSTLY_IQ1_S",
+    "IQ4_NL": "MOSTLY_IQ4_NL",
+    "IQ3_S": "MOSTLY_IQ3_S",
+    "IQ2_S": "MOSTLY_IQ2_S",
+    "IQ4_XS": "MOSTLY_IQ4_XS",
+    "I8": "MOSTLY_IQ1_S",
+    "I16": "MOSTLY_IQ1_M",
+    "I32": "MOSTLY_IQ2_M",
+    "I64": "MOSTLY_IQ3_M",
+    "F64": "MOSTLY_F64",
+    "IQ1_M": "MOSTLY_IQ1_M",
+    "BF16": "MOSTLY_BF16",
+    "Q4_0_4_4": "MOSTLY_Q4_0_4_4",
+    "Q4_0_4_8": "MOSTLY_Q4_0_4_8",
+    "Q4_0_8_8": "MOSTLY_Q4_0_8_8"
+}
+
+# You can now use this dictionary to map between the quantization types and Llama file types
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate GGUF files from single SD ckpt")
     parser.add_argument("--src", required=True, help="Source model ckpt file.")
@@ -26,7 +65,7 @@ def parse_args():
         input("Output exists enter to continue or ctrl+c to abort!")
     
     try:
-        args.ftype = getattr(gguf.LlamaFileType, f"MOSTLY_{args.qtype}")
+        args.ftype = getattr(gguf.LlamaFileType, quant_to_llama[args.qtype])
         args.qtype = getattr(gguf.GGMLQuantizationType, args.qtype)
     except AttributeError:
         parser.error(f"Unknown quant/file type {args.qtype}")
